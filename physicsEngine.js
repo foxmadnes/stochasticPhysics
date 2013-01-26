@@ -77,8 +77,8 @@ function InitializeDemo() {
     ripl.predict('force-x', 'a[' + point_unique_id + ']');
     ripl.predict('force-y', 'a[' + point_unique_id + ']');
     
-    ripl.observe('(pos-x a[' + point.unique_id + '] c[0])', 'r[' + point.plot_math_x + ']');
-    ripl.observe('(pos-y a[' + point.unique_id + '] c[0])', 'r[' + point.plot_math_y + ']');
+    point.observation_idx = ripl.observe('(pos-x a[' + point.unique_id + '] c[0])', 'r[' + point.plot_math_x + ']');
+    point.observation_idy = ripl.observe('(pos-y a[' + point.unique_id + '] c[0])', 'r[' + point.plot_math_y + ']');
     
     //First prediction will be non-moving, but will not last very long
     currentPathPredictions[point.unique_id] = new Line(point.html_x,point.html_y,point.html_x,point.html_y,paper);
@@ -92,7 +92,8 @@ function InitializeDemo() {
     next_point_unique_id++;
     point.circle.click(function(circle_event) {
       // If user clicks on the point, delete it.
-      ripl.forget(this.data("point_reference").observation_id); // Remove it from the engine trace.
+      ripl.forget(this.data("point_reference").observation_idx); // Remove it from the engine trace.
+      ripl.forget(this.data("point_reference").observation_idy);
       delete all_points[this.data("point_reference").unique_id]; // Remove it from the dictionary of all current points.
       this.remove(); // Remove the point from the paper.
     });
@@ -126,6 +127,10 @@ function updatePath() {
       point = all_points[point_unique_id];
       [new_x,new_y] = currentCoordPredictions[point_unique_id];
       point.circle.animate({cx: new_x, cy: new_y,cr: 5}, 400, "linear");
+
+      ripl.forget(point.observation_idx); // Remove it from the engine trace.
+      ripl.forget(point.observation_idy);      
+      
       ripl.observe('(pos-x a[' + point.unique_id + '] c[0])', 'r[' + new_x + ']');
       ripl.observe('(pos-y a[' + point.unique_id + '] c[0])', 'r[' + new_y + ']');
     }
