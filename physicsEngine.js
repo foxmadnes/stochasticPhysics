@@ -17,14 +17,14 @@ function InitializeDemo() {
   // Define the generic model:
   predicted_coords = new Array();
   
-  ripl.assume('initial-pos-x','(mem (normal 0.0 1.0))');
-  ripl.assume('initial-vel-x','(mem (normal 0.0 1.0))');
-  ripl.assume('force-x','(mem (normal 0.0 1.0))');
+  ripl.assume('initial-pos-x','(lambda () mem (normal 0.0 1.0))');
+  ripl.assume('initial-vel-x','(lambda () mem (normal 0.0 1.0))');
+  ripl.assume('force-x','(lambda () mem (normal 0.0 1.0))');
   predicted_coords[0] = ripl.assume('pos-x','(mem (lambda (time) (if (= time c[0]) (initial-pos-x) (+ (pos-x (dec time))(initial-vel-x)(force-x)(normal 0.0 0.01)))))');
   
-  ripl.assume('initial-pos-y','(mem (normal 0.0 1.0))');
-  ripl.assume('initial-vel-y','(mem (normal 0.0 1.0))');
-  ripl.assume('force-y','(mem (+ 9.8 (normal 0.0 1.0)))');
+  ripl.assume('initial-pos-y','(lambda () mem (normal 0.0 1.0))');
+  ripl.assume('initial-vel-y','(lambda () mem (normal 0.0 1.0))');
+  ripl.assume('force-y','(lambda() mem (+ 9.8 (normal 0.0 1.0)))');
   predicted_coords[1] = ripl.assume('pos-y','(mem (lambda (time) (if (= time c[0]) (initial-pos-y) (+ (pos-y (dec time))(initial-vel-y)(force-y)(normal 0.0 0.01)))))');
   ripl.start_cont_infer(1); // Start the continuous ("infinite") inference.
 
@@ -47,8 +47,7 @@ function InitializeDemo() {
     
   
   // Prepare the canvas in your browser.
-  var canvas = d3.select('#graphics_div').append("canvas").attr("width",420).attr("height",420).style("stroke","gray")
-  .on("click",function(d) {
+  var canvas = d3.select('#graphics_div').append("canvas").attr("width",420).attr("height",420).style("stroke","gray").on("click",function(d) {
     if (time > 100) {
       return;
     }
@@ -59,7 +58,8 @@ function InitializeDemo() {
     var point = new Object();
     
     // Coordinates in the browser window:
-    [point.html_x,point.html_y] = d3.mouse(canvas);
+    point.html_x = d3.event.x;
+    point.html_y = d3.event.y;
     
     // Create and pretty a circle on the plot.
     canvas.append("circle").style("stroke","gray").style("fill","grey")
@@ -101,7 +101,7 @@ function requestPath() {
                           // (i.e. from the *same sample*).
                           
   // Get the data from the current model state:
-  current_obs_noise = ripl.report_value(physic_noise_directive_id)['val'];
+  current_obs_noise = ripl.report_value(physics_noise_directive_id)['val'];
   current_phys_noise = ripl.report_value(obs_noise_directive_id)['val'];
   var points = new Array();
   for (var i=0; i < 100; i++ ) {
