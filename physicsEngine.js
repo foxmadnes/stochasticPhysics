@@ -6,6 +6,8 @@
 time = 0;
 timerid = 0;
 canvas;
+predicted_coords_x = new Array();
+predicted_coords_y = new Array();
 
 function InitializeDemo() {
   ripl = new ripl(); // Create a RIPL client object to communicate with the engine.
@@ -16,29 +18,32 @@ function InitializeDemo() {
   physics_noise_directive_id = ripl.assume('physics_noise', '(uniform-continuous 0.1 1.0)')['d_id'];
   
   // Define the generic model:
-  predicted_coords = new Array();
-  
+  predicted_coords_x = new Array();
+  predicted_coords_y = new Array();
   ripl.assume('initial-pos-x','(normal 0.0 1.0)');
   ripl.assume('initial-vel-x','(normal 0.0 1.0)');
   ripl.assume('force-x','(normal 0.0 1.0)');
-  predicted_coords[0] = ripl.assume('pos-x','(mem (lambda (time) (if (= time c[0]) initial-pos-x (+ (pos-x (dec time)) initial-vel-x force-x (normal 0.0 0.01)))))')['d_id'];
+  ripl.assume('pos-x','(mem (lambda (time) (if (= time c[0]) initial-pos-x (+ (pos-x (dec time)) initial-vel-x force-x (normal 0.0 0.01)))))')['d_id'];
   
   ripl.assume('initial-pos-y','(normal 0.0 1.0)');
   ripl.assume('initial-vel-y','(normal 0.0 1.0)');
   ripl.assume('force-y','(+ 9.8 (normal 0.0 1.0))');
-  predicted_coords[1] = ripl.assume('pos-y','(mem (lambda (time) (if (= time c[0]) initial-pos-y (+ (pos-y (dec time)) initial-vel-y force-y (normal 0.0 0.01)))))')['d_id'];
+  ripl.assume('pos-y','(mem (lambda (time) (if (= time c[0]) initial-pos-y (+ (pos-y (dec time)) initial-vel-y force-y (normal 0.0 0.01)))))')['d_id'];
 
   all_points = new Object(); // Init a JavaScript dictionary to save current points.
   next_point_unique_id = 0;
   
-  for (var i=0; i < 100; i++ ) {
-    ripl.predict('pos-x','c[' + i + ']');
+  x = new Array();
+  
+  for (var i=0; i < 10; i++ ) {
+    predicted_coords_x[i] = ripl.predict('(pos-x c[' + i + '])')['d_id'];
   }
     
-  for (var i=0; i < 100; i++ ) {
-    ripl.predict('pos-y', 'c[' + i + ']');
+  for (var i=0; i < 10; i++ ) {
+    predicted_coords_y[i] = ripl.predict('(pos-y c[' + i + '])')['d_id'];
   }
 
+  
     
   ripl.predict('initial-vel-x');
   ripl.predict('initial-vel-y');
@@ -105,13 +110,13 @@ function requestPath() {
   current_obs_noise = ripl.report_value(physics_noise_directive_id)['val'];
   current_phys_noise = ripl.report_value(obs_noise_directive_id)['val'];
   var points = new Array();
-  for (var i=0; i < 100; i++ ) {
-    x = ripl.report_value(predicted_coords[0])['val'];
-    y = ripl.report_value(predicted_coords[1])['val'];
+  for (var i=0; i < 10; i++ ) {
+    x = ripl.report_value(predicted_coords_x[i])['val'];
+    y = ripl.report_value(predicted_coords_y[i])['val'];
     points[i] = {"x":x,"y":y};
   }
   alert(points[0].x);
-  alert(points[10].x);
+  alert(points[9].x);
   drawPath(points);
   
   ripl.start_cont_infer(1);
