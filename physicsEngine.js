@@ -18,15 +18,15 @@ function InitializeDemo() {
   // Define the generic model:
   predicted_coords = new Array();
   
-  ripl.assume('initial-pos-x','(mem (lambda () (normal 0.0 1.0)))');
-  ripl.assume('initial-vel-x','(mem (lambda () (normal 0.0 1.0)))');
-  ripl.assume('force-x','(mem (lambda () (normal 0.0 1.0)))');
-  predicted_coords[0] = ripl.assume('pos-x','(mem (lambda (time) (if (= time c[0]) (initial-pos-x) (+ (pos-x (dec time))(initial-vel-x)(force-x)(normal 0.0 0.01)))))')['d_id'];
+  ripl.assume('initial-pos-x','(normal 0.0 1.0)');
+  ripl.assume('initial-vel-x','(normal 0.0 1.0)');
+  ripl.assume('force-x','(normal 0.0 1.0)');
+  predicted_coords[0] = ripl.assume('pos-x','(mem (lambda (time) (if (= time c[0]) initial-pos-x (+ (pos-x (dec time)) initial-vel-x force-x (normal 0.0 0.01)))))')['d_id'];
   
-  ripl.assume('initial-pos-y','(mem (lambda () (normal 0.0 1.0)))');
-  ripl.assume('initial-vel-y','(mem (lambda () (normal 0.0 1.0)))');
-  ripl.assume('force-y','(mem (lambda() (+ 9.8 (normal 0.0 1.0))))');
-  predicted_coords[1] = ripl.assume('pos-y','(mem (lambda (time) (if (= time c[0]) (initial-pos-y) (+ (pos-y (dec time))(initial-vel-y)(force-y)(normal 0.0 0.01)))))')['d_id'];
+  ripl.assume('initial-pos-y','(normal 0.0 1.0)');
+  ripl.assume('initial-vel-y','(normal 0.0 1.0)');
+  ripl.assume('force-y','(+ 9.8 (normal 0.0 1.0))');
+  predicted_coords[1] = ripl.assume('pos-y','(mem (lambda (time) (if (= time c[0]) initial-pos-y (+ (pos-y (dec time)) initial-vel-y force-y (normal 0.0 0.01)))))')['d_id'];
 
   all_points = new Object(); // Init a JavaScript dictionary to save current points.
   next_point_unique_id = 0;
@@ -110,8 +110,8 @@ function requestPath() {
     y = ripl.report_value(predicted_coords[1])['val'];
     points[i] = {"x":x,"y":y};
   }
-  alert(points[0][0]);
-  alert(points[10][0]);
+  alert(points[0].x);
+  alert(points[10].x);
   drawPath(points);
   
   ripl.start_cont_infer(1);
