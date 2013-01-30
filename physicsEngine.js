@@ -5,6 +5,7 @@
 //Global Timer
 time = 0;
 timerid = 0;
+canvas;
 
 function InitializeDemo() {
   ripl = new ripl(); // Create a RIPL client object to communicate with the engine.
@@ -17,16 +18,15 @@ function InitializeDemo() {
   // Define the generic model:
   predicted_coords = new Array();
   
-  ripl.assume('initial-pos-x','(lambda () mem (normal 0.0 1.0))');
-  ripl.assume('initial-vel-x','(lambda () mem (normal 0.0 1.0))');
-  ripl.assume('force-x','(lambda () mem (normal 0.0 1.0))');
-  predicted_coords[0] = ripl.assume('pos-x','(mem (lambda (time) (if (= time c[0]) (initial-pos-x) (+ (pos-x (dec time))(initial-vel-x)(force-x)(normal 0.0 0.01)))))');
+  ripl.assume('initial-pos-x','(mem (lambda () (normal 0.0 1.0)))');
+  ripl.assume('initial-vel-x','(mem (lambda () (normal 0.0 1.0)))');
+  ripl.assume('force-x','(mem (lambda () (normal 0.0 1.0)))');
+  predicted_coords[0] = ripl.assume('pos-x','(mem (lambda (time) (if (= time c[0]) (initial-pos-x) (+ (pos-x (dec time))(initial-vel-x)(force-x)(normal 0.0 0.01)))))')['d_id'];
   
-  ripl.assume('initial-pos-y','(lambda () mem (normal 0.0 1.0))');
-  ripl.assume('initial-vel-y','(lambda () mem (normal 0.0 1.0))');
-  ripl.assume('force-y','(lambda() mem (+ 9.8 (normal 0.0 1.0)))');
-  predicted_coords[1] = ripl.assume('pos-y','(mem (lambda (time) (if (= time c[0]) (initial-pos-y) (+ (pos-y (dec time))(initial-vel-y)(force-y)(normal 0.0 0.01)))))');
-  ripl.start_cont_infer(1); // Start the continuous ("infinite") inference.
+  ripl.assume('initial-pos-y','(mem (lambda () (normal 0.0 1.0)))');
+  ripl.assume('initial-vel-y','(mem (lambda () (normal 0.0 1.0)))');
+  ripl.assume('force-y','(mem (lambda() (+ 9.8 (normal 0.0 1.0))))');
+  predicted_coords[1] = ripl.assume('pos-y','(mem (lambda (time) (if (= time c[0]) (initial-pos-y) (+ (pos-y (dec time))(initial-vel-y)(force-y)(normal 0.0 0.01)))))')['d_id'];
 
   all_points = new Object(); // Init a JavaScript dictionary to save current points.
   next_point_unique_id = 0;
@@ -44,10 +44,11 @@ function InitializeDemo() {
   ripl.predict('initial-vel-y');
   ripl.predict('force-x');
   ripl.predict('force-y');
-    
+
+  ripl.start_cont_infer(1); // Start the continuous ("infinite") inference.
   
   // Prepare the canvas in your browser.
-  var canvas = d3.select('#graphics_div').append("canvas").attr("width",420).attr("height",420).style("stroke","gray").on("click",function(d) {
+  canvas = d3.select('#graphics_div').append("svg").attr("width",420).attr("height",420).style("stroke","gray").on("click",function(d) {
     if (time > 100) {
       return;
     }
@@ -116,5 +117,13 @@ function requestPath() {
 }
 
 function drawPath(points) {
-  canvas.append("path").data([points]).attr('d',line).style("stoke","#000000");
+  var lineFunction = d3.svg.line()
+    .x(function(d) { return d.x; })
+    .y(function(d) { return d.y; })
+    .interpolate("linear");
+  canvas.append("path")
+    .attr("d", lineFunction(points))
+    .attr("stroke", "blue")
+    .attr("stroke-width", 2)
+    .attr("fill", "none");
 }
