@@ -6,7 +6,7 @@ GLOBAL_DATA = [];
 
 function ripl() {
 	this.serverURL = 'http://ec2-54-235-201-199.compute-1.amazonaws.com:';
-	this.port = 5020; // 5000
+	this.port = 5001; // 5000
   this.assumes = "";
   this.observes = "";
   this.predicts = "";
