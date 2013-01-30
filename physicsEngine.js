@@ -5,7 +5,7 @@
 //Global Timer
 time = 0;
 timerid = 0;
-canvas;
+canvas = new Object();
 predicted_coords_x = new Array();
 predicted_coords_y = new Array();
 
@@ -82,8 +82,8 @@ function InitializeDemo() {
       timerid = setInterval("updateTime();",100);
     }
     else {
-      point.observation_idx = ripl.observe('(pos-x c[' + time + '])', 'r[' + point.html_x + ']');
-      point.observation_idy = ripl.observe('(pos-y c[' + time + '])', 'r[' + point.html_y + ']');
+      point.observation_idx = ripl.observe('(normal (pos-x c[' + time + ']) obs_noise)', 'r[' + point.html_x + ']');
+      point.observation_idy = ripl.observe('(normal (pos-y c[' + time + ']) obs_noise)', 'r[' + point.html_y + ']');
     }
     
     // Save the point to the dictionary of all current points.
