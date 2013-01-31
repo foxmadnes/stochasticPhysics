@@ -14,7 +14,7 @@ function InitializeDemo() {
   ripl.clearTrace(); // Clear the engine state.
   
   //Define noise params
-  obs_noise_directive_id = ripl.assume('obs_noise', '(uniform-continuous 0.1 1.0)')['d_id'];
+  obs_noise_directive_id = ripl.assume('obs_noise', '(uniform-continuous 0.1 0.2)')['d_id'];
   physics_noise_directive_id = ripl.assume('physics_noise', '(uniform-continuous 0.1 1.0)')['d_id'];
   
   // Define the generic model:
@@ -54,7 +54,7 @@ function InitializeDemo() {
   
   // Prepare the canvas in your browser.
   canvas = d3.select('#graphics_div').append("svg").attr("width",420).attr("height",420).style("stroke","gray").on("click",function(d) {
-    if (time > 100) {
+    if (time > 10) {
       return;
     }
     if (next_point_unique_id == 3) {
@@ -79,7 +79,7 @@ function InitializeDemo() {
     if (point.unique_id == 0) {
       point.observation_idx = ripl.observe('(pos-x c[0])', 'r[' + point.html_x + ']');
       point.observation_idy = ripl.observe('(pos-y c[0])', 'r[' + point.html_y + ']');
-      timerid = setInterval("updateTime();",100);
+      timerid = setInterval("updateTime();",1000);
     }
     else {
       point.observation_idx = ripl.observe('(normal (pos-x c[' + time + ']) obs_noise)', 'r[' + point.html_x + ']');
@@ -95,7 +95,7 @@ function InitializeDemo() {
 
 function updateTime() {
   time += 1;
-  if (time > 100) {
+  if (time > 10) {
     requestPath();
     clearInterval(timerid);
   }
@@ -118,7 +118,11 @@ function requestPath() {
   alert(points[0].x);
   alert(points[9].x);
   drawPath(points);
-  
+  testpoints = new Array();
+  testpoints[0] = {"x":41,"y":139};
+  testpoints[1] = {"x":142,"y":67};
+  testpoints[2] = {"x":233,"y":170};
+  drawPath(testpoints);
   ripl.start_cont_infer(1);
   
 }
