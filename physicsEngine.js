@@ -14,21 +14,21 @@ function InitializeDemo() {
   ripl.clearTrace(); // Clear the engine state.
   
   //Define noise params
-  obs_noise_directive_id = ripl.assume('obs_noise', '(uniform-continuous 0.1 0.2)')['d_id'];
-  physics_noise_directive_id = ripl.assume('physics_noise', '(uniform-continuous 0.1 1.0)')['d_id'];
+  obs_noise_directive_id = ripl.assume('obs_noise', '(uniform-continuous 0.0001 0.001)')['d_id'];
+  physics_noise_directive_id = ripl.assume('physics_noise', '(uniform-continuous 0.0001 0.001)')['d_id'];
   
   // Define the generic model:
   predicted_coords_x = new Array();
   predicted_coords_y = new Array();
-  ripl.assume('initial-pos-x','(normal 0.0 1.0)');
-  ripl.assume('initial-vel-x','(normal 0.0 1.0)');
-  ripl.assume('force-x','(normal 0.0 1.0)');
-  ripl.assume('pos-x','(mem (lambda (time) (if (= time c[0]) initial-pos-x (+ (pos-x (dec time)) initial-vel-x force-x (normal 0.0 0.01)))))')['d_id'];
+  ripl.assume('initial-pos-x','(uniform-continuous r[0] r[400.0])');
+  ripl.assume('initial-vel-x','(uniform-continuous r[-400.0] r[400.0])');
+  ripl.assume('force-x','(uniform-continuous r[-40.0] r[40.0])');
+  ripl.assume('pos-x','(mem (lambda (time) (if (= time c[0]) initial-pos-x (+ (pos-x (dec time)) initial-vel-x (* force-x time)(uniform-continuous 0.0 0.01)))))')['d_id'];
   
-  ripl.assume('initial-pos-y','(normal 0.0 1.0)');
-  ripl.assume('initial-vel-y','(normal 0.0 1.0)');
-  ripl.assume('force-y','(+ 9.8 (normal 0.0 1.0))');
-  ripl.assume('pos-y','(mem (lambda (time) (if (= time c[0]) initial-pos-y (+ (pos-y (dec time)) initial-vel-y force-y (normal 0.0 0.01)))))')['d_id'];
+  ripl.assume('initial-pos-y','(uniform-continuous r[0] r[400.0])');
+  ripl.assume('initial-vel-y','(uniform-continuous r[-400.0] r[400.0])');
+  ripl.assume('force-y','(uniform-continuous r[-40.0] r[40.0])'); 
+  ripl.assume('pos-y','(mem (lambda (time) (if (= time c[0]) initial-pos-y (+ (pos-y (dec time)) initial-vel-y (* force-y time)(uniform-continuous 0.0 0.01)))))')['d_id'];
 
   all_points = new Object(); // Init a JavaScript dictionary to save current points.
   next_point_unique_id = 0;
@@ -77,8 +77,8 @@ function InitializeDemo() {
     point.unique_id = next_point_unique_id;
 
     if (point.unique_id == 0) {
-      point.observation_idx = ripl.observe('(pos-x c[0])', 'r[' + point.html_x + ']');
-      point.observation_idy = ripl.observe('(pos-y c[0])', 'r[' + point.html_y + ']');
+      point.observation_idx = ripl.observe('(normal (pos-x c[0]) obs_noise)', 'r[' + point.html_x + ']');
+      point.observation_idx = ripl.observe('(normal (pos-y c[0]) obs_noise)', 'r[' + point.html_y + ']');
       timerid = setInterval("updateTime();",1000);
     }
     else {
@@ -96,6 +96,7 @@ function InitializeDemo() {
 function updateTime() {
   time += 1;
   if (time > 10) {
+    ripl.infer(1000);
     requestPath();
     clearInterval(timerid);
   }
@@ -115,15 +116,14 @@ function requestPath() {
     y = ripl.report_value(predicted_coords_y[i])['val'];
     points[i] = {"x":x,"y":y};
   }
-  alert(points[0].x);
-  alert(points[9].x);
   drawPath(points);
-  testpoints = new Array();
-  testpoints[0] = {"x":41,"y":139};
-  testpoints[1] = {"x":142,"y":67};
-  testpoints[2] = {"x":233,"y":170};
-  drawPath(testpoints);
+  //testpoints = new Array();
+  //testpoints[0] = {"x":41,"y":139};
+  //testpoints[1] = {"x":142,"y":67};
+  //testpoints[2] = {"x":233,"y":170};
+  //drawPath(testpoints);
   ripl.start_cont_infer(1);
+  timerid = setInterval("updateTime();",1000);
   
 }
 
