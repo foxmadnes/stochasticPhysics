@@ -158,7 +158,7 @@ function requestPath() {
 function drawPath(points) {
   
   //Change opacity, if get the chance, make it fade over time (be a function of current opacity)
-  canvas.selectAll("path").attr("opacity",0.25).attr("stroke","blue");
+  canvas.selectAll("path").attr("opacity",0.25).attr("stroke","blue").attr("stroke-dasharray","5,5");
   
   //D3 Path plotter
   var lineFunction = d3.svg.line()
