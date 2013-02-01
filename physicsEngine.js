@@ -65,7 +65,7 @@ function InitializeDemo() {
   // Prepare the canvas in your browser.
   canvas = d3.select('#graphics_div').append("svg").attr("width",420).attr("height",420).style("stroke","gray").on("click",function(d) {
     //No need to process clicks after time has finished.
-    if (time > 10) {
+    if (time > 9) {
       return;
     }
     
